@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -108,7 +109,7 @@ public class AuthController {
     }
 
 
-    @PutMapping("/change-password")
+    /*@PutMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
@@ -128,8 +129,30 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok("Senha alterada com sucesso");
-    }
+    }*/
 
+
+    @PutMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+
+        User user = userRepository.findByEmail(userEmail).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", "Usuário não encontrado"));
+        }
+
+        // Verifica se a senha antiga está correta
+        if (!passwordEncoder.matches(changePasswordDTO.oldPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Senha antiga incorreta"));
+        }
+
+        // Atualiza a senha do usuário
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.newPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Senha alterada com sucesso"));
+    }
 
 
     @GetMapping("/user/{id}")
