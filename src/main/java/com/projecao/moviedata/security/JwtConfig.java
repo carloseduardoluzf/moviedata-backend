@@ -3,7 +3,6 @@ package com.projecao.moviedata.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,7 +24,8 @@ public class JwtConfig {
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/user/**").permitAll()
-                        .requestMatchers("/recipe/**").permitAll()
+                        .requestMatchers("/movies").permitAll()
+                        .requestMatchers("/movies/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtTokenFilter(secret), UsernamePasswordAuthenticationFilter.class);
         return http.build();
